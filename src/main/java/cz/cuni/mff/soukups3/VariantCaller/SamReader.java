@@ -74,7 +74,7 @@ public class SamReader implements ReadsProvider, Iterator<Read[]> {
                             lineSeparated[2],
                             Integer.parseInt(lineSeparated[3]),
                             Integer.parseInt(lineSeparated[4]),
-                            lineSeparated[5],
+                            Cigar.fromString(lineSeparated[5]),
                             lineSeparated[6],
                             Integer.parseInt(lineSeparated[7]),
                             Integer.parseInt(lineSeparated[8]),
