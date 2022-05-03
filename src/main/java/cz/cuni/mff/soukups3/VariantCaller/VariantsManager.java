@@ -1,12 +1,27 @@
 package cz.cuni.mff.soukups3.VariantCaller;
 
 public interface VariantsManager {
-    public void receiveVariant(Variant variant);
-    public default void receiveVariant(Variant[] variants){
-        for (Variant variant:
-             variants) {
-            receiveVariant(variant);
+    void reportVariant(Variant variant,
+                       boolean forwardCovered,
+                       boolean forward,
+                       boolean reverseCovered,
+                       boolean reverse);
+    default void reportVariant(Variant[] variants,
+                               boolean[] forwardCovereds,
+                               boolean[] forwards,
+                               boolean[] reverseCovereds,
+                               boolean[] reverses){
+        for (int i = 0; i < variants.length; i++) {
+            reportVariant(variants[i],
+                            forwardCovereds[i],
+                            forwards[i],
+                            reverseCovereds[i],
+                            reverses[i]);
         }
     }
-    public Iterable<Variant> output();
+    void reportQualityCoverage(String chrom, int pos);
+    void reportCoverage(String chrom, int pos);
+    int getCoverage(String chrom, int pos);
+    int getQualityCoverage(String chrom, int pos);
+    Iterable<VariantStats> output();
 }

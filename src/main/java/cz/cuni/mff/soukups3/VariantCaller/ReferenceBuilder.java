@@ -2,7 +2,7 @@ package cz.cuni.mff.soukups3.VariantCaller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  */
 public class ReferenceBuilder {
     // TODO: Add wrapper around these so that Arrays of size Long are also possible.
-    private HashMap<String, Character[]> bases = new HashMap<>();
+    private LinkedHashMap<String, Character[]> bases = new LinkedHashMap<>();
     private LinkedList<Character> currentChromosome;
     private String currentChromosomeName = "";
     /**
@@ -35,6 +35,9 @@ public class ReferenceBuilder {
         } catch (IOException e) {
             System.err.println("Reference reader failed on" + e);
         }
+        if (currentChromosome.size()>1){
+            bases.put(currentChromosomeName, currentChromosome.toArray(new Character[0]));
+        }
     }
 
     private void processSequenceLine(String line) {
@@ -50,7 +53,7 @@ public class ReferenceBuilder {
         currentChromosome.add('\0');
     }
 
-    public HashMap<String, Character[]> getBases() {
+    public LinkedHashMap<String, Character[]> getBases() {
         return bases;
     }
 }

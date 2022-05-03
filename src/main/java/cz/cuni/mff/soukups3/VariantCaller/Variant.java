@@ -2,30 +2,53 @@ package cz.cuni.mff.soukups3.VariantCaller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Variant {
-    private final String chrom;
-    private final int pos;
-    private final String variantString;
-    private Map<String, Object> stats;
+    public enum VariantType{
+        INSERTION,
+        DELETION,
+        MISMATCH
+    }
 
-    public Variant(String chrom, int pos, String variantString){
+    public VariantType type;
+    public final String chrom;
+    public final int pos;
+    public String variantString;
+
+    public Variant(VariantType type, String chrom, int pos, String variantString){
+        this.type = type;
         this.chrom = chrom;
         this.pos = pos;
         this.variantString = variantString;
-        stats = new HashMap<>();
     }
-    public void addStat(String key, Object value){
-        stats.put(key, value);
+    public void addToVariantString(char c){
+        variantString += c;
     }
 
     @Override
     public String toString() {
         return "Variant{" +
-                "chrom='" + chrom + '\'' +
+                "type=" + type +
+                ", chrom='" + chrom + '\'' +
                 ", pos=" + pos +
                 ", variantString='" + variantString + '\'' +
-                ", stats=" + stats +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Variant variant = (Variant) o;
+        return pos == variant.pos
+                && type == variant.type
+                && chrom.equals(variant.chrom)
+                && variantString.equals(variant.variantString);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, chrom, pos, variantString);
     }
 }

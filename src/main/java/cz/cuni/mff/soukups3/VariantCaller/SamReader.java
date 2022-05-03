@@ -53,6 +53,7 @@ public class SamReader implements ReadsProvider, Iterator<Read[]> {
             }
             lastRead=newRead;
         }
+        retList.stream().forEach(x -> System.err.println(x.toString() + Read.isReverse(x)));
         return retList.toArray(new Read[0]);
     }
 
@@ -79,7 +80,7 @@ public class SamReader implements ReadsProvider, Iterator<Read[]> {
                             Integer.parseInt(lineSeparated[7]),
                             Integer.parseInt(lineSeparated[8]),
                             lineSeparated[9],
-                            lineSeparated[6]));
+                            lineSeparated[10]));
                 } catch (IndexOutOfBoundsException e){
                     System.err.println("SamReader: Ignoring line: \"" + line + "\"");
                 }
