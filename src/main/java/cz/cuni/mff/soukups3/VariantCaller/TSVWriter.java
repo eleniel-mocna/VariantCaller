@@ -1,57 +1,56 @@
 package cz.cuni.mff.soukups3.VariantCaller;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
+public record TSVWriter(Reference reference) implements ReportsWriter {
+    private final static String SEP = "\t";
+    private final static String header = "CHROM"+SEP
+            +"POS"+SEP
+            +"REF"+SEP
+            +"ALT"+SEP
+            +"ADFP"+SEP
+            +"ADFU"+SEP
+            +"ADRP"+SEP
+            +"ADRU"+SEP
+            +"ADP"+SEP
+            +"DP"+SEP
+            +"QDP"+System.lineSeparator();
 
-public class TSVWriter implements ReportsWriter {
-    private final static String header = "CHROM\tPOS\tREF\tALT\tADFP\tADFU\tADRP\tADRU\tADP\tDP\tQDP\n";
-    private final static String SEP="\t";
-    private Reference reference;
-
-    public TSVWriter(Reference reference){
-
-        this.reference = reference;
-    }
-     @Override
+    @Override
     public String writeVariants(VariantsManager manager) {
         Iterable<VariantStats> allVariants = manager.output();
         StringBuilder ret = new StringBuilder();
-         ret.append(header);
+        ret.append(header);
 
         for (VariantStats variant :
                 allVariants) {
-            System.err.println(variant);
-            ret.append(variant.variant.chrom + SEP); //CHR
-            ret.append(variant.variant.pos + SEP); //POS
+            ret.append(variant.variant.chrom).append(SEP); //CHR
+            ret.append(variant.variant.pos).append(SEP); //POS
             // REF
             if (variant.variant.type.equals(Variant.VariantType.MISMATCH)
-                || variant.variant.type.equals(Variant.VariantType.INSERTION)){
-                ret.append(reference.getBase(variant.variant.chrom, variant.variant.pos) + SEP);
-            }
-            else {
+                    || variant.variant.type.equals(Variant.VariantType.INSERTION)) {
+                ret.append(reference.getBase(variant.variant.chrom, variant.variant.pos)).append(SEP);
+            } else {
                 ret.append(reference.getBases(variant.variant.chrom,
-                                            variant.variant.pos-1,
-                        variant.variant.pos + variant.variant.variantString.length()) + SEP);
+                        variant.variant.pos,
+                        variant.variant.pos + variant.variant.variantString.length() + 1)).append(SEP);
             }
 
             //ALT
             if (variant.variant.type.equals(Variant.VariantType.MISMATCH)
-                || variant.variant.type.equals(Variant.VariantType.INSERTION)){
-                ret.append(variant.variant.variantString + SEP);
+                    || variant.variant.type.equals(Variant.VariantType.INSERTION)) {
+                ret.append(variant.variant.variantString).append(SEP);
+            } else {
+                ret.append(reference.getBase(variant.variant.chrom, variant.variant.pos)).append(SEP);
             }
-            else {
-                ret.append(reference.getBase(variant.variant.chrom, variant.variant.pos-1) + SEP);
-            }
-            ret.append(variant.forwardPaired + SEP); //ADFP
-            ret.append(variant.forwardUnpaired + SEP); //ADFU
-            ret.append(variant.reversePaired + SEP); //ADRP
-            ret.append(variant.reverseUnpaired + SEP); //ADRU
-            ret.append(variant.paired + SEP); //ADP
-            ret.append(manager.getCoverage(variant.variant.chrom, variant.variant.pos) + SEP); //DP
-            ret.append(manager.getQualityCoverage(variant.variant.chrom, variant.variant.pos) + SEP); //QDP
+            ret.append(variant.forwardPaired).append(SEP); //ADFP
+            ret.append(variant.forwardUnpaired).append(SEP); //ADFU
+            ret.append(variant.reversePaired).append(SEP); //ADRP
+            ret.append(variant.reverseUnpaired).append(SEP); //ADRU
+            ret.append(variant.paired).append(SEP); //ADP
+            ret.append(manager.getCoverage(variant.variant.chrom, variant.variant.pos)).append(SEP); //DP
+            ret.append(manager.getQualityCoverage(variant.variant.chrom, variant.variant.pos)); //QDP
             ret.append(System.lineSeparator());
-            }
+        }
 
-         return ret.toString();
+        return ret.toString();
     }
 }

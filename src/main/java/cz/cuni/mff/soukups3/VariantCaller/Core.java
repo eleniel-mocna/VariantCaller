@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.concurrent.RecursiveAction;
 
 public class Core extends RecursiveAction {
-    private Reference reference;
-    private ReadsProvider readsProvider;
-    private VariantsManager variantsManager;
-    private int minMapQ;
-    private int minQual;
+    private final Reference reference;
+    private final ReadsProvider readsProvider;
+    private final VariantsManager variantsManager;
+    private final int minMapQ;
+    private final int minQual;
 
     public Core(Reference reference,
                 ReadsProvider readsProvider,
@@ -26,7 +26,6 @@ public class Core extends RecursiveAction {
     @Override
     protected void compute() {
         while (readsProvider.hasNext()){
-            System.err.println(readsProvider.hasNext());
             analyzeReads(readsProvider.getNext());
         }
 
@@ -37,7 +36,7 @@ public class Core extends RecursiveAction {
         }
         LinkedList<Variant> variants = new LinkedList<>();
         Character readBase;
-        Character referenceBase;
+        char referenceBase;
         char lastCigar = 'M';
         int qual;
         int lastQual=100000;
@@ -45,22 +44,21 @@ public class Core extends RecursiveAction {
         int readIndex=0;
         for (char cigar :
                 read.cigar()) {
-
             readBase=read.seqAt(readIndex);
             referenceBase = reference.getBase(read.rname(), refIndex);
-            cigar=read.cigarAt(readIndex);
             qual=read.qualAt(readIndex);
             boolean qualityPassed = qual>=minQual;
             switch (Character.toUpperCase(cigar)){
                 case 'M', 'X', '=' -> {
-                    if (readBase.equals(referenceBase)){
-                        if (qualityPassed){
-                            variantsManager.reportQualityCoverage(read.rname(), refIndex);
-                        }
-                        variantsManager.reportCoverage(read.rname(), refIndex);
+                    if (qualityPassed){
+                        variantsManager.reportQualityCoverage(read.rname(), refIndex);
                     }
-                    else if (qualityPassed){
-                        variants.add(new Variant(Variant.VariantType.MISMATCH, read.rname(), refIndex, Character.toString(readBase)));
+                    variantsManager.reportCoverage(read.rname(), refIndex);
+                    if (!readBase.equals(referenceBase)) {
+                        if (qualityPassed){
+                            variants.add(new Variant(Variant.VariantType.MISMATCH,
+                                    read.rname(), refIndex, Character.toString(readBase)));
+                        }
                     }
                     refIndex++;
                     readIndex++;
@@ -73,14 +71,13 @@ public class Core extends RecursiveAction {
                             variants.pop();
                         }
                         else {
+                            //noinspection ConstantConditions //Is checked by lastCigar
                             variants.peekLast().addToVariantString(readBase);
                         }
                     }
                     else {
                         lastQual=qual;
-                        if (lastQual<minQual){}
-
-                        else {
+                        if (lastQual >= minQual) {
                             variants.add(new Variant(Variant.VariantType.INSERTION,
                                                     read.rname(),
                                                     refIndex-1,
@@ -93,23 +90,19 @@ public class Core extends RecursiveAction {
                 }
                 case 'D' -> {
                     if (lastCigar=='D'){
+                        //noinspection ConstantConditions //Presence is checked by lastCigar
                         variants.peekLast().addToVariantString('\0');
                     }
                     else {
                         variants.add(new Variant(Variant.VariantType.DELETION,
                                                 read.rname(),
-                                                refIndex, // This probably needs -1?
+                                                refIndex-1,
                                                 "\0"));
                     }
-                    System.err.println("DELETE:" + lastCigar);
                     refIndex++;
                 }
-                case 'N' -> {
-                    refIndex++;
-                }
-                case 'S' -> {
-                    readIndex++;
-                }
+                case 'N' -> refIndex++;
+                case 'S' -> readIndex++;
                 case 'H', 'P' -> {}
                 default -> throw new IllegalStateException("Unexpected value: " + cigar);
             }
@@ -119,7 +112,7 @@ public class Core extends RecursiveAction {
     }
     private void analyzeReads(Read[] reads){
         List<LinkedList<Variant>> variantss = Arrays.stream(reads).map(this::analyzeRead).toList();
-        int remainingVariants = variantss.stream().mapToInt(x -> x.size()).sum();
+        int remainingVariants = variantss.stream().mapToInt(LinkedList::size).sum();
         while (remainingVariants>0){
             boolean forward=false;
             boolean reverse=false;
@@ -129,8 +122,9 @@ public class Core extends RecursiveAction {
                     variant -> (variant.peek()==null) ? Integer.MAX_VALUE : variant.peek().pos)
                     .min().getAsInt();
             // Now we find one of the first variants.
+            @SuppressWarnings("OptionalGetWithoutIsPresent") // Is checked by remainingVariants
             Variant currentVariant = variantss.stream()
-                    .map(list -> list.peek()).filter(x -> x!=null && x.pos==minPos)
+                    .map(LinkedList::peek).filter(x -> x!=null && x.pos==minPos)
                     .findAny().get();
 
             // variants are ordered by pos. So this is just a `merge` (as in mergesort)
@@ -154,7 +148,7 @@ public class Core extends RecursiveAction {
                                             forward,
                                             reverseCoverage,
                                             reverse);
-        remainingVariants = variantss.stream().mapToInt(x -> x.size()).sum();
+        remainingVariants = variantss.stream().mapToInt(LinkedList::size).sum();
         }
     }
 }

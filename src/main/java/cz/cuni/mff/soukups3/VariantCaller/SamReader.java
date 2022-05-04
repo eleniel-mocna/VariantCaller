@@ -8,6 +8,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class SamReader implements ReadsProvider, Iterator<Read[]> {
     private final BufferedReader inputReader;
     private final int BUFFER_CAPACITY=100000;
+    @SuppressWarnings("FieldCanBeLocal")
     private final Thread supplyThread;
     private Read lastRead;
     private final ArrayBlockingQueue<Read[]> outputBuffer = new ArrayBlockingQueue<>(BUFFER_CAPACITY);
@@ -53,7 +54,6 @@ public class SamReader implements ReadsProvider, Iterator<Read[]> {
             }
             lastRead=newRead;
         }
-        retList.stream().forEach(x -> System.err.println(x.toString() + Read.isReverse(x)));
         return retList.toArray(new Read[0]);
     }
 
