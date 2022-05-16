@@ -6,6 +6,11 @@ import java.util.Objects;
 public record Read(String qname, int flag, String rname, int pos, int mapq, Cigar cigar,
        String rnext, int pnext, int tlen, String seq, String qual) implements Serializable {
 
+    /**
+     * Check if the given read is of the same name as this one
+     * @param obj Object for comparison
+     * @return Do these two reads have the same name?
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
@@ -35,16 +40,43 @@ public record Read(String qname, int flag, String rname, int pos, int mapq, Ciga
                 "qual=" + qual + ']';
     }
 
-    public char cigarAt(int i){
-        return cigar.charAt(i);
-    }
-    public char seqAt(int i){
-        return seq.charAt(i);
-    }
-    public int qualAt(int i){
-        return fred2int(qual.charAt(i));
+    /**
+     * Get the cigar at the given readIndex
+     * @param readIndex At which index of the read
+     * @return The cigar character for the read
+     */
+    public char cigarAt(int readIndex){
+        return cigar.charAt(readIndex);
     }
 
+    /**
+     * Get the sequence base at the given readIndex
+     * @param readIndex At which index of the read
+     * @return The base character in the read
+     */
+    public char seqAt(int readIndex){
+        if (seq.length()>readIndex) {
+            return seq.charAt(readIndex);
+        }
+        return '\0';
+    }
+
+    /**
+     * Get quality at readIndex
+     * @param readIndex the given index
+     * @return quality at the given readIndex
+     */
+    public int qualAt(int readIndex){
+        if (qual.length()>readIndex) {
+            return fred2int(qual.charAt(readIndex));
+        }
+        return 0;
+    }
+
+    /**
+     * Get the length of the read from the reference's perspective.
+     * @return reference observed length
+     */
     public int size(){
         return tlen;
     }

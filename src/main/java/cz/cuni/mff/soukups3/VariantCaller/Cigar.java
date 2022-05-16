@@ -44,6 +44,7 @@ public record Cigar(Integer[] lengths, Character[] values) implements Iterable<C
         throw new IndexOutOfBoundsException("This should never be thrown!!!");
     }
 
+
     @Override
     public Iterator<Character> iterator() {
         return new Iterator<Character>() {

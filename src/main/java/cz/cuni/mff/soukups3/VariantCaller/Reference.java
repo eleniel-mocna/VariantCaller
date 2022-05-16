@@ -1,11 +1,23 @@
 package cz.cuni.mff.soukups3.VariantCaller;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class Reference {
     private final LinkedHashMap<String, Character[]> bases;
+    private final List<String> chromNames;
     public Reference(ReferenceBuilder builder){
         bases=builder.getBases();
+        chromNames = bases.keySet().stream().toList();
+    }
+
+    /**
+     * Returns the index of the given chromosome or -1 if there is none
+     * @param chrom the name of the chromosome
+     * @return the position of the chromosome
+     */
+    public int getChromIndex(String chrom){
+        return chromNames.indexOf(chrom);
     }
 
     /**

@@ -1,17 +1,16 @@
 package cz.cuni.mff.soukups3.VariantCaller;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class DefaultVariantsManager implements VariantsManager{
     public String location2String(String chrom, int pos){
         return chrom+'\0'+pos;
     }
-    private Reference reference;
-    private HashMap<String, HashMap<Variant, VariantStats>> variants;
-    private HashMap<String, Integer> depths;
-    private HashMap<String, Integer> qualityDepths;
+    private final Reference reference;
+    private final HashMap<String, HashMap<Variant, VariantStats>> variants;
+    private final HashMap<String, Integer> depths;
+    private final HashMap<String, Integer> qualityDepths;
     public DefaultVariantsManager(Reference reference){
         this.reference = reference;
         depths = new HashMap<>();
@@ -21,7 +20,7 @@ public class DefaultVariantsManager implements VariantsManager{
     }
 
     @Override
-    public void reportVariant(Variant variant,
+    public synchronized void reportVariant(Variant variant,
                               boolean forwardCovered,
                               boolean forward,
                               boolean reverseCovered,
@@ -38,14 +37,14 @@ public class DefaultVariantsManager implements VariantsManager{
     }
 
     @Override
-    public void reportQualityCoverage(String chrom, int pos) {
+    public synchronized void reportQualityCoverage(String chrom, int pos) {
         String key = location2String(chrom, pos);
         qualityDepths.putIfAbsent(key, 0);
         qualityDepths.put(key, qualityDepths.get(key)+1);
     }
 
     @Override
-    public void reportCoverage(String chrom, int pos) {
+    public synchronized void reportCoverage(String chrom, int pos) {
         String key = location2String(chrom, pos);
         depths.putIfAbsent(key, 0);
         depths.put(key, depths.get(key)+1);
@@ -65,8 +64,8 @@ public class DefaultVariantsManager implements VariantsManager{
 
     @Override
     public Iterable<VariantStats> output() {
-        return variants.keySet().stream()
-                .flatMap(key -> variants.get(key).values().stream().sorted())
+        return variants.keySet().stream().sorted(Comparator.comparingInt(reference::getChromIndex))
+                .flatMap(key -> variants.get(key).values().stream().sorted(Comparator.comparingInt(x -> x.variant.pos)))
                 .collect(Collectors.toList());
     }
 }

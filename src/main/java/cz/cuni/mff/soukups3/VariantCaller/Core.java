@@ -1,6 +1,7 @@
 package cz.cuni.mff.soukups3.VariantCaller;
 
 import java.util.Arrays;
+import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
@@ -36,18 +37,25 @@ public class Core extends RecursiveAction {
         }
         LinkedList<Variant> variants = new LinkedList<>();
         Character readBase;
+        boolean mapQPass = read.mapq()>=minMapQ;
         char referenceBase;
         char lastCigar = 'M';
         int qual;
         int lastQual=100000;
         int refIndex=read.pos();
         int readIndex=0;
+        if (Read.isWierd(read)){
+            System.err.println("Wierd read: " + read);
+        }
         for (char cigar :
                 read.cigar()) {
             readBase=read.seqAt(readIndex);
             referenceBase = reference.getBase(read.rname(), refIndex);
             qual=read.qualAt(readIndex);
-            boolean qualityPassed = qual>=minQual;
+            boolean qualityPassed = mapQPass && qual>=minQual;
+            if (readBase.equals('\0') && "MX=ID".contains(String.valueOf(cigar))){
+                throw new InputMismatchException("Wrong input on Read: " + read);
+            }
             switch (Character.toUpperCase(cigar)){
                 case 'M', 'X', '=' -> {
                     if (qualityPassed){

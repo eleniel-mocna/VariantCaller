@@ -7,13 +7,15 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class SamReader implements ReadsProvider, Iterator<Read[]> {
     private final BufferedReader inputReader;
+    @SuppressWarnings("FieldCanBeLocal")
     private final int BUFFER_CAPACITY=100000;
     @SuppressWarnings("FieldCanBeLocal")
     private final Thread supplyThread;
     private Read lastRead;
-    private final ArrayBlockingQueue<Read[]> outputBuffer = new ArrayBlockingQueue<>(BUFFER_CAPACITY);
+    private final LinkedList<Read[]> outputBuffer = new LinkedList<>();
     private boolean ended = false;
     public SamReader(BufferedReader is) {
+        System.err.println("SamReader Started!");
         this.inputReader = is;
         supplyThread = new Thread(() -> {
             try {
@@ -28,7 +30,14 @@ public class SamReader implements ReadsProvider, Iterator<Read[]> {
     public void start() throws IOException {
         lastRead=getNextRead();
         Read[] newReads;
+        System.err.println(outputBuffer.size());
         while ((newReads=getNextReads())!=null){
+            while (outputBuffer.size()>=BUFFER_CAPACITY){
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                }
+            }
             outputBuffer.add(newReads);
         }
     }
@@ -70,7 +79,7 @@ public class SamReader implements ReadsProvider, Iterator<Read[]> {
             if (line.charAt(0) != '@') {
                 lineSeparated = line.split("\t");
                 try {
-                    return (new Read(lineSeparated[0],
+                    Read ret = new Read(lineSeparated[0],
                             Integer.parseInt(lineSeparated[1]),
                             lineSeparated[2],
                             Integer.parseInt(lineSeparated[3]),
@@ -80,7 +89,11 @@ public class SamReader implements ReadsProvider, Iterator<Read[]> {
                             Integer.parseInt(lineSeparated[7]),
                             Integer.parseInt(lineSeparated[8]),
                             lineSeparated[9],
-                            lineSeparated[10]));
+                            lineSeparated[10]);
+                    if (!Read.isWierd(ret)) {
+                        return ret;
+                    }
+
                 } catch (IndexOutOfBoundsException e){
                     System.err.println("SamReader: Ignoring line: \"" + line + "\"");
                 }
@@ -96,12 +109,13 @@ public class SamReader implements ReadsProvider, Iterator<Read[]> {
     public synchronized Read[] getNext() {
         Read[] result;
         if (hasNext()) {
-            try {
-                result = outputBuffer.take();
-            } catch (InterruptedException e) {
-                System.err.println("SamReader queue interrupted!");
-                result = null;
+            while (hasNext() && outputBuffer.size()==0){
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                }
             }
+            result = outputBuffer.pollFirst();
         }
         else {
             result=null;
