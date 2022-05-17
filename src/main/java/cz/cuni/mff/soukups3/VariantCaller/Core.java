@@ -49,9 +49,6 @@ public class Core extends RecursiveAction implements Runnable {
      * @return LinkedList of found Variants
      */
     private LinkedList<Variant> analyzeRead(Read read){
-        if (read.mapq()<minMapQ){
-            return new LinkedList<>();
-        }
         LinkedList<Variant> variants = new LinkedList<>();
         Character readBase;
         boolean mapQPass = read.mapq()>=minMapQ;
@@ -61,9 +58,6 @@ public class Core extends RecursiveAction implements Runnable {
         int lastQual=100000;
         int refIndex=read.pos();
         int readIndex=0;
-        if (Read.isWierd(read)){
-            System.err.println("Wierd read: " + read);
-        }
         for (char cigar :
                 read.cigar()) {
             readBase=read.seqAt(readIndex);

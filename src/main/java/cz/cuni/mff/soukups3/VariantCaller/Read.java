@@ -8,7 +8,7 @@ import java.util.Objects;
  * @param qname Name of the read
  * @param flag Flag info from the read
  * @param rname Chromosome name
- * @param pos Position inside of the chromosome (1-based)
+ * @param pos Position inside the chromosome (1-based)
  * @param mapq Mapping quality
  * @param cigar Cigar string
  * @param rnext Next (pair) read's chromosome

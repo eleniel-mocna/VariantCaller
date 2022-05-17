@@ -30,6 +30,7 @@ public class SamReader implements ReadsProvider, Iterator<Read[]>, Runnable {
         try {
             while (!inputReader.ready()) {
                 System.err.println(".sam input stream not ready, waiting 5 seconds... (Did you pipe input?)");
+                //noinspection BusyWait
                 Thread.sleep(5000);
             }
         } catch (IOException | InterruptedException e) {
@@ -44,7 +45,6 @@ public class SamReader implements ReadsProvider, Iterator<Read[]>, Runnable {
             return;
         }
         Read[] newReads;
-        System.err.println(outputBuffer.size());
         while (true){
             try {
                 if ((newReads = getNextReads()) == null) break;

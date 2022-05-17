@@ -12,22 +12,26 @@ import java.util.ArrayList;
  * Main class, which runs when the app is started.
  */
 public class Main {
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name="--minMapQ",usage="Minimal mapping quality.")
     private int minMapQ=0;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name="--minBaseQ",usage="Minimal base quality.")
     private int minBaseQ=0;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name="--reference",usage="Path to the reference file.")
     private String reference_path ="/reference/hg19.fa";
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name="--threads",usage="Maximum number of processing threads")
     private int nThreads=1;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name="--tsv",usage="Path to the output tsv file.")
     private String tsv_path="stdout";
 
-    private long start;
     /**
      * Syntactic only main.
      * @param args Arguments passed to main
@@ -47,7 +51,7 @@ public class Main {
             return;
         }
         log_start();
-        start=System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         SamReader samReader = new SamReader(new BufferedReader(new InputStreamReader(System.in)));
         Reference reference = new Reference(new ReferenceBuilder(reference_path));
         VariantsManager manager = new DefaultVariantsManager(reference);
@@ -73,7 +77,7 @@ public class Main {
         } else {
         System.out.print(new TSVWriter(reference).writeVariants(manager));
         }
-        System.err.println("Time elapsed: " + ((System.currentTimeMillis()-start)/1000.0) + " s");
+        System.err.println("Time elapsed: " + ((System.currentTimeMillis()- start)/1000.0) + " s");
     }
 
     private void log_start() {
