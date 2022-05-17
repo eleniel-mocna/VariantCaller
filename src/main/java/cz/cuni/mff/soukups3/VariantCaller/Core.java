@@ -6,13 +6,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
 
-public class Core extends RecursiveAction {
+/**
+ * Core analyzes all Reads available from the provided ReadsProvider and reports the found variants to the provided
+ * VariantsManager. If ReadsProvider and VariantsManager are Thread-safe there can be more Cores running in parallel.
+ */
+public class Core extends RecursiveAction implements Runnable {
     private final Reference reference;
     private final ReadsProvider readsProvider;
     private final VariantsManager variantsManager;
     private final int minMapQ;
     private final int minQual;
 
+    /**
+     * @param reference Reference to which the given Reads are aligned
+     * @param readsProvider Where should the Reads come from
+     * @param variantsManager Where to report the found variants
+     * @param minMapQ Minimal mapping quality
+     * @param minQual Minimal per base quality
+     */
     public Core(Reference reference,
                 ReadsProvider readsProvider,
                 VariantsManager variantsManager,
@@ -24,13 +35,22 @@ public class Core extends RecursiveAction {
         this.minMapQ = minMapQ;
         this.minQual = minQual;
     }
+
+    /**
+     * Start this core processing all available reads.
+     */
     @Override
-    protected void compute() {
+    public void compute() {
         while (readsProvider.hasNext()){
             analyzeReads(readsProvider.getNext());
         }
-
     }
+
+    /**
+     * @param read Analyze one read and return found variants.
+     *             This is just a normal variant calling.
+     * @return LinkedList of found Variants
+     */
     private LinkedList<Variant> analyzeRead(Read read){
         if (read.mapq()<minMapQ){
             return new LinkedList<>();
@@ -118,6 +138,10 @@ public class Core extends RecursiveAction {
         }
         return variants;
     }
+
+    /**
+     * @param reads join all result from each of the analyzeRead for each Read and report found variants and stats.
+     */
     private void analyzeReads(Read[] reads){
         List<LinkedList<Variant>> variantss = Arrays.stream(reads).map(this::analyzeRead).toList();
         int remainingVariants = variantss.stream().mapToInt(LinkedList::size).sum();
@@ -158,5 +182,13 @@ public class Core extends RecursiveAction {
                                             reverse);
         remainingVariants = variantss.stream().mapToInt(LinkedList::size).sum();
         }
+    }
+
+    /**
+     * Start this core processing available reads (until ReadsProvider is done)
+     */
+    @Override
+    public void run() {
+        compute();
     }
 }

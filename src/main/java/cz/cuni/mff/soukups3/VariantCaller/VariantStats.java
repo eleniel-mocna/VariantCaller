@@ -1,7 +1,7 @@
 package cz.cuni.mff.soukups3.VariantCaller;
 
-public class VariantStats implements Comparable {
-    public Variant variant;
+public class VariantStats implements Comparable<VariantStats> {
+    public final Variant variant;
     public int forwardPaired = 0;
     public int forwardUnpaired = 0;
     public int reversePaired = 0;
@@ -34,14 +34,17 @@ public class VariantStats implements Comparable {
         }
     }
 
+    /**
+     * @param stats Variant to be compared to
+     * @return In chromosome comparison (this.pos - stats.pos)
+     */
     @Override
-    public int compareTo(Object o) {
-        if (o.getClass().equals(VariantStats.class)){
-
-            return variant.pos-((VariantStats) o).variant.pos;
+    public int compareTo(VariantStats stats) {
+        if (stats.getClass().equals(VariantStats.class)){
+            return variant.pos- stats.variant.pos;
         }
         System.err.println("WARNING: VariantStats compared unpredictably!");
-        return variant.hashCode()-o.hashCode();
+        return variant.hashCode()-stats.hashCode();
     }
 
     @Override

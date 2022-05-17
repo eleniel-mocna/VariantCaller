@@ -25,8 +25,9 @@ public record TSVWriter(Reference reference) implements ReportsWriter {
             ret.append(variant.variant.chrom).append(SEP); //CHR
             ret.append(variant.variant.pos).append(SEP); //POS
             // REF
-            if (variant.variant.type.equals(Variant.VariantType.MISMATCH)
-                    || variant.variant.type.equals(Variant.VariantType.INSERTION)) {
+            boolean notDeletion = variant.variant.type.equals(Variant.VariantType.MISMATCH)
+                    || variant.variant.type.equals(Variant.VariantType.INSERTION);
+            if (notDeletion) {
                 ret.append(reference.getBase(variant.variant.chrom, variant.variant.pos)).append(SEP);
             } else {
                 ret.append(reference.getBases(variant.variant.chrom,
@@ -35,8 +36,7 @@ public record TSVWriter(Reference reference) implements ReportsWriter {
             }
 
             //ALT
-            if (variant.variant.type.equals(Variant.VariantType.MISMATCH)
-                    || variant.variant.type.equals(Variant.VariantType.INSERTION)) {
+            if (notDeletion) {
                 ret.append(variant.variant.variantString).append(SEP);
             } else {
                 ret.append(reference.getBase(variant.variant.chrom, variant.variant.pos)).append(SEP);

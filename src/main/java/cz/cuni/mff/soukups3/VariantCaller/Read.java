@@ -45,6 +45,7 @@ public record Read(String qname, int flag, String rname, int pos, int mapq, Ciga
      * @param readIndex At which index of the read
      * @return The cigar character for the read
      */
+    @SuppressWarnings("unused")
     public char cigarAt(int readIndex){
         return cigar.charAt(readIndex);
     }
@@ -77,25 +78,51 @@ public record Read(String qname, int flag, String rname, int pos, int mapq, Ciga
      * Get the length of the read from the reference's perspective.
      * @return reference observed length
      */
+    @SuppressWarnings("unused")
     public int size(){
         return tlen;
     }
+
+    /**
+     * @param chrom Chromosome of the location
+     * @param pos Position of the location
+     * @return Does this read cover the given location
+     */
     public boolean coversPosition(String chrom, int pos){
         return this.rname.equals(chrom)
                 && pos >= this.pos
                 && pos < this.pos + tlen;
     }
+
+    /**
+     * @param qual Character encrypted quality
+     * @return Real value of this quality
+     */
     public static int fred2int(char qual){
         return (int)qual - 33;
     }
+
+    /**
+     * @param read Read to be checked
+     * @return Is this Read on the reverse strand
+     */
     public static boolean isReverse(Read read){
         return (read.flag/128)%2==1;
     }
 
+    /**
+     * @param read Read to be checked
+     * @return Is this Read on the forward strand?
+     */
     public static boolean isForward(Read read){
         return (read.flag/64)%2==1;
     }
 
+
+    /**
+     * @param read Read to be checked
+     * @return Is this read wierd (supplementary or secondary alignment)?
+     */
     public static boolean isWierd(Read read){
         return (read.flag/256)%2==1 || (read.flag/2048)%2==1;
     }

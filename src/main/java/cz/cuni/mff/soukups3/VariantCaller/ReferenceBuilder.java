@@ -3,8 +3,6 @@ package cz.cuni.mff.soukups3.VariantCaller;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.stream.Collectors;
 
 /**
  * This class takes a BufferedReader and does all the hard
@@ -12,12 +10,11 @@ import java.util.stream.Collectors;
  * Reference object is then created from this class.
  */
 public class ReferenceBuilder {
-    // TODO: Add wrapper around these so that Arrays of size Long are also possible.
     private final LinkedHashMap<String, Character[]> bases = new LinkedHashMap<>();
     private ArrayList<Character> currentChromosome;
     private String currentChromosomeName = "";
     private int whichChrom=0;
-    private final Integer[] chromosomeLengths;
+    private Integer[] chromosomeLengths;
 
     /**
      * Prepare everything for the Reference object
@@ -73,7 +70,7 @@ public class ReferenceBuilder {
     }
 
     private void saveChromLengths(String faPath){
-        int[] chromLengths = bases.values().stream().mapToInt(x->x.length).toArray();
+        chromosomeLengths = bases.values().stream().mapToInt(x->x.length).boxed().toArray(Integer[]::new);
         try(BufferedWriter bw = new BufferedWriter(new FileWriter(faPath+".lengths"))){
             bases.values().stream().mapToInt(x->x.length).forEach(x->{
                 try {
@@ -119,7 +116,9 @@ public class ReferenceBuilder {
 
     }
 
-
+    /**
+     * @return The bases built by this builder
+     */
     public LinkedHashMap<String, Character[]> getBases() {
         return bases;
     }

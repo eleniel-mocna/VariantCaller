@@ -3,9 +3,8 @@ package cz.cuni.mff.soukups3.VariantCaller;
 import java.io.*;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.concurrent.ArrayBlockingQueue;
 
-public class SamReader implements ReadsProvider, Iterator<Read[]> {
+public class SamReader implements ReadsProvider, Iterator<Read[]>, Runnable {
     private final BufferedReader inputReader;
     @SuppressWarnings("FieldCanBeLocal")
     private final int BUFFER_CAPACITY=100000;
@@ -14,28 +13,38 @@ public class SamReader implements ReadsProvider, Iterator<Read[]> {
     private Read lastRead;
     private final LinkedList<Read[]> outputBuffer = new LinkedList<>();
     private boolean ended = false;
-    public SamReader(BufferedReader is) {
+
+    /**
+     * @param bufferedReader Reader from which the Reads are read.
+     */
+    public SamReader(BufferedReader bufferedReader) {
         System.err.println("SamReader Started!");
-        this.inputReader = is;
-        supplyThread = new Thread(() -> {
-            try {
-                start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        this.inputReader = bufferedReader;
+        supplyThread = new Thread(this);
         supplyThread.start();
     }
 
-    public void start() throws IOException {
-        lastRead=getNextRead();
+    public void run() {
+        try {
+            lastRead=getNextRead();
+        } catch (IOException e) {
+            System.err.println("SamReader failed on:" + e);
+            return;
+        }
         Read[] newReads;
         System.err.println(outputBuffer.size());
-        while ((newReads=getNextReads())!=null){
+        while (true){
+            try {
+                if ((newReads = getNextReads()) == null) break;
+            } catch (IOException e) {
+                System.err.println("SamReader failed on:" + e);
+                return;
+            }
             while (outputBuffer.size()>=BUFFER_CAPACITY){
                 try {
+                    //noinspection BusyWait // I will keep it this way, it's easier and shouldn't make a big difference
                     Thread.sleep(5000);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
                 }
             }
             outputBuffer.add(newReads);
@@ -111,8 +120,9 @@ public class SamReader implements ReadsProvider, Iterator<Read[]> {
         if (hasNext()) {
             while (hasNext() && outputBuffer.size()==0){
                 try {
+                    //noinspection BusyWait // I will keep it this way, it's easier and shouldn't make a big difference
                     Thread.sleep(10);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
                 }
             }
             result = outputBuffer.pollFirst();

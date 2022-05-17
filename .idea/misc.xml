@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="EntryPointsManager">
+    <pattern value="cz.cuni.mff.soukups3.VariantCaller.ReportsWriter" method="writeVariants" />
+  </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="JavadocGenerationManager">
+    <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/src/main/resources" />
+  </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>

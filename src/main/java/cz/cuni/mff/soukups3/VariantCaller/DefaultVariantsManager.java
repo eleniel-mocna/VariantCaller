@@ -3,6 +3,9 @@ package cz.cuni.mff.soukups3.VariantCaller;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * This is a default class implementing VariantsManager interface.
+ */
 public class DefaultVariantsManager implements VariantsManager{
     public String location2String(String chrom, int pos){
         return chrom+'\0'+pos;
@@ -11,6 +14,10 @@ public class DefaultVariantsManager implements VariantsManager{
     private final HashMap<String, HashMap<Variant, VariantStats>> variants;
     private final HashMap<String, Integer> depths;
     private final HashMap<String, Integer> qualityDepths;
+
+    /**
+     * @param reference Reference to which the variants are found.
+     */
     public DefaultVariantsManager(Reference reference){
         this.reference = reference;
         depths = new HashMap<>();
@@ -18,6 +25,7 @@ public class DefaultVariantsManager implements VariantsManager{
         variants = new HashMap<>();
         Arrays.stream(reference.getChromosomes()).forEach(x -> variants.put(x, new HashMap<>()));
     }
+
 
     @Override
     public synchronized void reportVariant(Variant variant,
@@ -36,6 +44,7 @@ public class DefaultVariantsManager implements VariantsManager{
                             reverse);
     }
 
+
     @Override
     public synchronized void reportQualityCoverage(String chrom, int pos) {
         String key = location2String(chrom, pos);
@@ -43,12 +52,14 @@ public class DefaultVariantsManager implements VariantsManager{
         qualityDepths.put(key, qualityDepths.get(key)+1);
     }
 
+
     @Override
     public synchronized void reportCoverage(String chrom, int pos) {
         String key = location2String(chrom, pos);
         depths.putIfAbsent(key, 0);
         depths.put(key, depths.get(key)+1);
     }
+
 
     @Override
     public int getCoverage(String chrom, int pos) {

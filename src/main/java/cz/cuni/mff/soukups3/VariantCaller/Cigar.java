@@ -4,7 +4,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+
 public record Cigar(Integer[] lengths, Character[] values) implements Iterable<Character> {
+    /**
+     * @param cigar String from a sam file to be used as a cigar
+     * @return Cigar object created from the given cigar string
+     */
     public static Cigar fromString(String cigar){
         LinkedList<Integer> lengths = new LinkedList<>();
         LinkedList<Character> values = new LinkedList<>();
@@ -30,9 +35,18 @@ public record Cigar(Integer[] lengths, Character[] values) implements Iterable<C
         }
         return ret.toString();
     }
+
+    /**
+     * @return Number of cigar values (1 value per base)
+     */
     public int size(){
-        return Arrays.stream(lengths).mapToInt(x -> x.intValue()).sum();
+        return Arrays.stream(lengths).mapToInt(x -> x).sum();
     }
+
+    /**
+     * @param index Index in the corresponding read
+     * @return Corresponding cigar at the given index
+     */
     public char charAt(int index){
         if (index>=size() || index < 0){
             throw new IndexOutOfBoundsException();
@@ -44,14 +58,14 @@ public record Cigar(Integer[] lengths, Character[] values) implements Iterable<C
         throw new IndexOutOfBoundsException("This should never be thrown!!!");
     }
 
-
     @Override
     public Iterator<Character> iterator() {
-        return new Iterator<Character>() {
+        return new Iterator<>() {
             int index = 0;
+
             @Override
             public boolean hasNext() {
-                return index<size();
+                return index < size();
             }
 
             @Override
