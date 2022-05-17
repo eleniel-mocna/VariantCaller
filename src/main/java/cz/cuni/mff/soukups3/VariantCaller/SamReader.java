@@ -21,13 +21,22 @@ public class SamReader implements ReadsProvider, Iterator<Read[]>, Runnable {
      * @param bufferedReader Reader from which the Reads are read.
      */
     public SamReader(BufferedReader bufferedReader) {
-        System.err.println("SamReader Started!");
         this.inputReader = bufferedReader;
         supplyThread = new Thread(this);
         supplyThread.start();
     }
 
     public void run() {
+        try {
+            while (!inputReader.ready()) {
+                System.err.println(".sam input stream not ready, waiting 5 seconds... (Did you pipe input?)");
+                Thread.sleep(5000);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
         try {
             lastRead=getNextRead();
         } catch (IOException e) {
@@ -107,6 +116,9 @@ public class SamReader implements ReadsProvider, Iterator<Read[]>, Runnable {
                     }
 
                 } catch (IndexOutOfBoundsException e){
+                    // Here we care only about Reads with not enough columns,
+                    // Reads with too many columns might still be valid because of additional
+                    // columns added at the end.
                     System.err.println("SamReader: Ignoring line: \"" + line + "\"");
                 }
             }

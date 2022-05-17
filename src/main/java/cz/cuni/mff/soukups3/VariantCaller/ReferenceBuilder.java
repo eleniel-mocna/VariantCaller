@@ -31,7 +31,6 @@ public class ReferenceBuilder {
             System.err.println("Reference file not found! Exiting...");
             throw new FileNotFoundException("Reference file not found! Exiting...");
         }
-        System.err.println("Building reference:");
         try {
             while ((line = reader.readLine()) != null) {
                 if ("@;<>L".contains(line.substring(0,1))){
@@ -94,13 +93,14 @@ public class ReferenceBuilder {
         else return chromosomeLengths[whichChrom++];
     }
     private void processSequenceLine(String line) {
-        currentChromosome.addAll(line.chars().mapToObj(x -> (char) x).map(Character::toUpperCase).toList());
+        currentChromosome.addAll(line.chars().mapToObj(x -> (char) x)
+                .filter(c -> Character.isAlphabetic(c) || "-*".contains(String.valueOf(c)))
+                .map(Character::toUpperCase).toList());
     }
 
     private void processHeader(String line) {
         if (currentChromosome==null) {
             int l = getNextChromLength()+1;
-            System.err.println("Next length: " + l);
             currentChromosome=new ArrayList<>(l);
             currentChromosome.add('\0');
         }
@@ -108,7 +108,6 @@ public class ReferenceBuilder {
             System.err.println("Read chrom " + currentChromosomeName + ", length:" + currentChromosome.size());
             bases.put(currentChromosomeName, currentChromosome.toArray(new Character[0]));
             int l = getNextChromLength()+1;
-            System.err.println("Next length: " + l);
             currentChromosome=new ArrayList<>(l);
             currentChromosome.add('\0');
         }

@@ -1,9 +1,6 @@
 package cz.cuni.mff.soukups3.VariantCaller;
 
-import java.util.Arrays;
-import java.util.InputMismatchException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.RecursiveAction;
 
 /**
@@ -74,7 +71,8 @@ public class Core extends RecursiveAction implements Runnable {
             qual=read.qualAt(readIndex);
             boolean qualityPassed = mapQPass && qual>=minQual;
             if (readBase.equals('\0') && "MX=ID".contains(String.valueOf(cigar))){
-                throw new InputMismatchException("Wrong input on Read: " + read);
+                throw new InputMismatchException("Wrong input (probably length mismatch on Read:\n"
+                        + read);
             }
             switch (Character.toUpperCase(cigar)){
                 case 'M', 'X', '=' -> {
@@ -143,7 +141,13 @@ public class Core extends RecursiveAction implements Runnable {
      * @param reads join all result from each of the analyzeRead for each Read and report found variants and stats.
      */
     private void analyzeReads(Read[] reads){
-        List<LinkedList<Variant>> variantss = Arrays.stream(reads).map(this::analyzeRead).toList();
+        List<LinkedList<Variant>> variantss;
+        try {
+            variantss = Arrays.stream(reads).map(this::analyzeRead).toList();
+        } catch (NoSuchElementException e){
+            System.err.println("No variants have been found! Something is probably wrong.");
+            variantss = new LinkedList<>();
+        }
         int remainingVariants = variantss.stream().mapToInt(LinkedList::size).sum();
         while (remainingVariants>0){
             boolean forward=false;

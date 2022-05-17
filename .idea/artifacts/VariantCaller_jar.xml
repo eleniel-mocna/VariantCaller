@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="VariantCaller:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/VariantCaller_jar</output-path>
+    <root id="archive" name="VariantCaller.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/jar-out/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="VariantCaller" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/args4j/args4j/2.33/args4j-2.33.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

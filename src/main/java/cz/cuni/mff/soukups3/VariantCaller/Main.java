@@ -7,28 +7,27 @@ import org.kohsuke.args4j.Option;
 import java.io.*;
 import java.util.ArrayList;
 
-import static org.kohsuke.args4j.OptionHandlerFilter.ALL;
-
 
 /**
  * Main class, which runs when the app is started.
  */
 public class Main {
     @Option(name="--minMapQ",usage="Minimal mapping quality.")
-    private final int minMapQ=0;
+    private int minMapQ=0;
 
     @Option(name="--minBaseQ",usage="Minimal base quality.")
-    private final int minBaseQ=0;
+    private int minBaseQ=0;
 
     @Option(name="--reference",usage="Path to the reference file.")
-    private final String reference_path ="/reference/hg19.fa";
+    private String reference_path ="/reference/hg19.fa";
 
     @Option(name="--threads",usage="Maximum number of processing threads")
-    private final int nThreads=1;
+    private int nThreads=1;
 
     @Option(name="--tsv",usage="Path to the output tsv file.")
-    private final String tsv_path="";
+    private String tsv_path="stdout";
 
+    private long start;
     /**
      * Syntactic only main.
      * @param args Arguments passed to main
@@ -44,11 +43,11 @@ public class Main {
      * @throws IOException When some read from disk fails
      */
     public void doMain(String[] args) throws IOException {
-        parseArguments(args);
-        System.err.println(reference_path);
-        System.err.println("Started");
-        long start;
-        System.err.println(start=System.currentTimeMillis());
+        if (!parseArguments(args)){
+            return;
+        }
+        log_start();
+        start=System.currentTimeMillis();
         SamReader samReader = new SamReader(new BufferedReader(new InputStreamReader(System.in)));
         Reference reference = new Reference(new ReferenceBuilder(reference_path));
         VariantsManager manager = new DefaultVariantsManager(reference);
@@ -67,7 +66,7 @@ public class Main {
                 e.printStackTrace();
             }
         }
-        if (!"".equals(tsv_path)) {
+        if (!"stdout".equals(tsv_path)) {
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(tsv_path))) {
                 bw.write(new TSVWriter(reference).writeVariants(manager));
             }
@@ -77,7 +76,18 @@ public class Main {
         System.err.println("Time elapsed: " + ((System.currentTimeMillis()-start)/1000.0) + " s");
     }
 
-    private void parseArguments(String[] args) {
+    private void log_start() {
+        System.err.println("########################");
+        System.err.println("Variant caller started with the following arguments:");
+        System.err.println("  minMapQ = " + minMapQ);
+        System.err.println("  minBaseQ = " + minBaseQ);
+        System.err.println("  reference_path = " + reference_path);
+        System.err.println("  nThreads = " + nThreads);
+        System.err.println("  tsv_path = " + tsv_path);
+        System.err.println("########################");
+    }
+
+    private boolean parseArguments(String[] args) {
         CmdLineParser parser = new CmdLineParser(this);
         try {
             parser.parseArgument(args);
@@ -86,11 +96,10 @@ public class Main {
             System.err.println("java -jar VariantCaller.jar [options...]");
             parser.printUsage(System.err);
             System.err.println();
-
-            // print option sample. This is useful some time
-            System.err.println("  Example: java SampleMain"+parser.printExample(ALL));
-            return;
+            System.err.println("  <sample_data/example.sam java -jar VariantCaller.jar --reference sample_data/ref.fa");
+            return false;
         }
+        return true;
     }
 }
 // 140.313
