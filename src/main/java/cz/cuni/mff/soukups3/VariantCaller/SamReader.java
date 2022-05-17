@@ -4,6 +4,9 @@ import java.io.*;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+/**
+ * Class which takes Reads from a Sam file from a reader and provides them via ReadProvider.
+ */
 public class SamReader implements ReadsProvider, Iterator<Read[]>, Runnable {
     private final BufferedReader inputReader;
     @SuppressWarnings("FieldCanBeLocal")

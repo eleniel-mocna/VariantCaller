@@ -7,6 +7,12 @@ import java.util.stream.Collectors;
  * This is a default class implementing VariantsManager interface.
  */
 public class DefaultVariantsManager implements VariantsManager{
+
+    /**
+     * @param chrom Location's chromosome
+     * @param pos Location's position
+     * @return Converted location to String
+     */
     public String location2String(String chrom, int pos){
         return chrom+'\0'+pos;
     }

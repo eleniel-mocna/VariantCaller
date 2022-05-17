@@ -1,5 +1,8 @@
 package cz.cuni.mff.soukups3.VariantCaller;
 
+/**
+ * Class containing all stats for one Variant.
+ */
 public class VariantStats implements Comparable<VariantStats> {
     public final Variant variant;
     public int forwardPaired = 0;
@@ -8,10 +11,23 @@ public class VariantStats implements Comparable<VariantStats> {
     public int reverseUnpaired = 0;
     public int paired = 0;
 
+    /**
+     * @param variant Create a VariantStats around a variant
+     *                with empty stats.
+     */
     public VariantStats(Variant variant){
-
         this.variant = variant;
     }
+
+    /**
+     * Add statistics for this variant from one Reads group
+     * @param forwardCovered Is this variant supported in the forward strand and covered by reverse strand,
+     *                       but NOT supported by the latter?
+     * @param forward Is this variant supported in the forward strand and NOT covered by reverse strand?
+     * @param reverseCovered Is this variant supported in the reverse strand and covered by forward strand,
+     *                       but NOT supported by the latter?
+     * @param reverse Is this variant supported in the reverse strand and NOT covered by forward strand?
+     */
     public void addStats(boolean forwardCovered,
                          boolean forward,
                          boolean reverseCovered,

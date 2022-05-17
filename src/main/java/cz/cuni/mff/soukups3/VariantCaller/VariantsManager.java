@@ -1,5 +1,8 @@
 package cz.cuni.mff.soukups3.VariantCaller;
 
+/**
+ * Interface for storing and then providing all variants with all stats etc.
+ */
 public interface VariantsManager {
     /**
      * Register the provided variant with the given stats.
@@ -43,5 +46,9 @@ public interface VariantsManager {
      * @return The coverage passing quality at the location
      */
     int getQualityCoverage(String chrom, int pos);
+
+    /**
+     * @return All variants
+     */
     Iterable<VariantStats> output();
 }

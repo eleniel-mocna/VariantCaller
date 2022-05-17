@@ -5,6 +5,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 
+/**
+ * Record managing cigar string for a read
+ * @param lengths Lengths of individual cigar characters (how many times should it be applied)
+ * @param values Values of cigar characters
+ */
 public record Cigar(Integer[] lengths, Character[] values) implements Iterable<Character> {
     /**
      * @param cigar String from a sam file to be used as a cigar

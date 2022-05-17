@@ -2,7 +2,13 @@ package cz.cuni.mff.soukups3.VariantCaller;
 
 import java.util.Objects;
 
+/**
+ * Class for storing a variant without any stats.
+ */
 public class Variant {
+    /**
+     * Defines of which type the given Variant is.
+     */
     public enum VariantType{
         INSERTION,
         DELETION,

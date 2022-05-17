@@ -1,5 +1,9 @@
 package cz.cuni.mff.soukups3.VariantCaller;
 
+/**
+ * Class which provides a String representation of found variants.
+ * @param reference Reference to which the variants where found.
+ */
 public record TSVWriter(Reference reference) implements ReportsWriter {
     private final static String SEP = "\t";
     private final static String header = "CHROM"+SEP

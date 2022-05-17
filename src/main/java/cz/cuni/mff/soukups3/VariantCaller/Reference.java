@@ -3,9 +3,17 @@ package cz.cuni.mff.soukups3.VariantCaller;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+/**
+ * Class for managing the reference, allowing easily access bases at given location.
+ */
 public class Reference {
     private final LinkedHashMap<String, Character[]> bases;
     private final List<String> chromNames;
+
+    /**
+     * Create a reference from a builder.
+     * @param builder Builder which prepared everything for this Reference
+     */
     public Reference(ReferenceBuilder builder){
         bases=builder.getBases();
         chromNames = bases.keySet().stream().toList();

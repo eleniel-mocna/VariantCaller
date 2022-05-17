@@ -3,8 +3,33 @@ package cz.cuni.mff.soukups3.VariantCaller;
 import java.io.Serializable;
 import java.util.Objects;
 
-public record Read(String qname, int flag, String rname, int pos, int mapq, Cigar cigar,
-       String rnext, int pnext, int tlen, String seq, String qual) implements Serializable {
+/**
+ * Class managing one Read from the sam file.
+ * @param qname Name of the read
+ * @param flag Flag info from the read
+ * @param rname Chromosome name
+ * @param pos Position inside of the chromosome (1-based)
+ * @param mapq Mapping quality
+ * @param cigar Cigar string
+ * @param rnext Next (pair) read's chromosome
+ * @param pnext Next (pair) read's position
+ * @param tlen Template length (length over reference)
+ * @param seq Sequence inside this read
+ * @param qual Per base quality
+ */
+public record Read(
+        String qname,
+        int flag,
+        String rname,
+        int pos,
+        int mapq,
+        Cigar cigar,
+        String rnext,
+        int pnext,
+        int tlen,
+        String seq,
+        String qual
+) implements Serializable {
 
     /**
      * Check if the given read is of the same name as this one

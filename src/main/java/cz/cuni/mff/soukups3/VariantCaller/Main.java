@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import static org.kohsuke.args4j.OptionHandlerFilter.ALL;
 
 
+/**
+ * Main class, which runs when the app is started.
+ */
 public class Main {
     @Option(name="--minMapQ",usage="Minimal mapping quality.")
     private final int minMapQ=0;
@@ -26,9 +29,20 @@ public class Main {
     @Option(name="--tsv",usage="Path to the output tsv file.")
     private final String tsv_path="";
 
+    /**
+     * Syntactic only main.
+     * @param args Arguments passed to main
+     * @throws IOException When some read from disk fails
+     */
     public static void main(String[] args) throws IOException {
         new Main().doMain(args);
     }
+
+    /**
+     * Main but non-static.
+     * @param args Arguments passed to main
+     * @throws IOException When some read from disk fails
+     */
     public void doMain(String[] args) throws IOException {
         parseArguments(args);
         System.err.println(reference_path);
